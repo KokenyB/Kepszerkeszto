@@ -1,0 +1,2 @@
+# Kepszerkeszto
+Kepszerkeszto alkalmazas
