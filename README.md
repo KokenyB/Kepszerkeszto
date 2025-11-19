@@ -1,3 +1,3 @@
 # Kepszerkeszto
 Kepszerkeszto alkalmazas
-<br>Huggingface: https://huggingface.co/eigen-ai-labs/eigen-banana-qwen-image-edit
+<br>Huggingface kinézett model: https://huggingface.co/eigen-ai-labs/eigen-banana-qwen-image-edit
