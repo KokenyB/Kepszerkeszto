@@ -1,5 +1,5 @@
 # Kepszerkeszto
-<p>Kepszerkeszto alkalmazas</p>
+<p>Kepszerkeszto alkalmazas
 <br>Huggingface kinézett model: https://huggingface.co/eigen-ai-labs/eigen-banana-qwen-image-edit<p>
 Funkciók:<br>
 -szöveg felismerés<br>
