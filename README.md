@@ -1,11 +1,11 @@
 # Kepszerkeszto
 Kepszerkeszto alkalmazas
 <br>Huggingface kinézett model: https://huggingface.co/eigen-ai-labs/eigen-banana-qwen-image-edit
-Funkciók:
--szöveg felismerés
--fölismert szöveg körbevágása
--szöveg képre illesztése
--háttér kezelése
--fényerő állítása
--tárgyak felismerése/körbevágása
+Funkciók:<br>
+-szöveg felismerés<br>
+-fölismert szöveg körbevágása<br>
+-szöveg képre illesztése<br>
+-háttér kezelése<br>
+-fényerő állítása<br>
+-tárgyak felismerése/körbevágása<br>
 
