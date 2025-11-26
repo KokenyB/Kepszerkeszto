@@ -28,7 +28,21 @@ pipe = QwenImagePipeline.from_pretrained(
 # Load the Eigen-Banana-Qwen-Image-Edit LoRA
 pipe.load_lora(pipe.dit, "eigen-ai-labs/eigen-banana-qwen-image-edit/eigen-banana-qwen-image-edit-fp16-lora.safetensors")
 
+def start() =
 
+    print("""
+    Funkciók:
+
+    (1)Szövegfelismerés
+    (2)Felismert szöveg körbevágása
+    (3)Szöveg képre illesztése
+    (4)Háttér megváltoztatása
+    (5)Fényerő megváltoztatása
+    (6)Kiválasztott tárgy felismerése és körbevágása
+
+    """)
+
+    print("Kérem válassza ki a kívánt funkciót (1-6): ")
 
 
 
