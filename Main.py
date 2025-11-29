@@ -1,5 +1,5 @@
-#from diffsynth.pipelines.qwen_image import QwenImagePipeline, ModelConfig
-#import torch
+from diffsynth.pipelines.qwen_image import QwenImagePipeline, ModelConfig
+import torch
 import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
@@ -7,30 +7,30 @@ from PIL import Image, ImageTk
 #//-------------------------------------------------------------------------------------------------------------------------
 #//definíciók, funkciók:
 
-#pipe = QwenImagePipeline.from_pretrained(
-#    torch_dtype=torch.bfloat16,
-#    device="cuda",
-#    model_configs=[
-#        ModelConfig(
-#            model_id="Qwen/Qwen-Image-Edit",
-#            origin_file_pattern="transformer/diffusion_pytorch_model*.safetensors"
-#        ),
-#        ModelConfig(
-#            model_id="Qwen/Qwen-Image",
-#            origin_file_pattern="text_encoder/model*.safetensors"
-#        ),
-#        ModelConfig(
-#            model_id="Qwen/Qwen-Image",
-#            origin_file_pattern="vae/diffusion_pytorch_model.safetensors"
-#        ),
-#    ],
-#    processor_config=ModelConfig(
-#        model_id="Qwen/Qwen-Image-Edit",
-#        origin_file_pattern="processor/"
-#    ),
-#)
-#
-#pipe.load_lora(pipe.dit, "eigen-ai-labs/eigen-banana-qwen-image-edit/eigen-banana-qwen-image-edit-fp16-lora.safetensors")
+pipe = QwenImagePipeline.from_pretrained(
+    torch_dtype=torch.bfloat16,
+    device="cuda",
+    model_configs=[
+        ModelConfig(
+            model_id="Qwen/Qwen-Image-Edit",
+            origin_file_pattern="transformer/diffusion_pytorch_model*.safetensors"
+        ),
+        ModelConfig(
+            model_id="Qwen/Qwen-Image",
+            origin_file_pattern="text_encoder/model*.safetensors"
+        ),
+        ModelConfig(
+            model_id="Qwen/Qwen-Image",
+            origin_file_pattern="vae/diffusion_pytorch_model.safetensors"
+        ),
+    ],
+    processor_config=ModelConfig(
+        model_id="Qwen/Qwen-Image-Edit",
+        origin_file_pattern="processor/"
+    ),
+)
+
+pipe.load_lora(pipe.dit, "eigen-ai-labs/eigen-banana-qwen-image-edit/eigen-banana-qwen-image-edit-fp16-lora.safetensors")
 
 def belep(event):
     if prompt_text.get('1.0', "end-1c") == placeholder:
@@ -53,25 +53,24 @@ def kepfeltoltes():
         felt_canvas.image = felt_kep
 
 def kepszerkesztes():
-    pass
+    
     szerk_prompt += prompt_text.get()
-    #szerk_kep = pipe(
-    #szerk_prompt,
-    #szerk_kep=felt_kep,
-    #seed=1,
-    #num_inference_steps=40,
-    #height=400,
-    #width=300,
-    #edit_image_auto_resize=True
-    #)
-    #szerk_canvas.create_image(0, 0, anchor="nw", image=szerk_kep)
-    #szerk_canvas.image = szerk_kep
+    szerk_kep = pipe(
+    szerk_prompt,
+    szerk_kep=felt_kep,
+    seed=1,
+    num_inference_steps=40,
+    height=400,
+    width=300,
+    edit_image_auto_resize=True#)
+    szerk_canvas.create_image(0, 0, anchor="nw", image=szerk_kep)
+    szerk_canvas.image = szerk_kep
 
 def kepletoltes():
-    pass
-    #if szerk_canvas.image:
-    #    szerk_kep.save("szerkesztett_kep"+imgcount+".png")
-    #    imgcount += 1
+    
+    if szerk_canvas.image:
+        szerk_kep.save("szerkesztett_kep"+imgcount+".png")
+       imgcount += 1
 
 def funkciovalasztas(c):
     if c == 1:
