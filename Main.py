@@ -1,4 +1,7 @@
-from diffsynth.pipelines.qwen_image import QwenImagePipeline, ModelConfig
+from PIL import Image
+import PIL
+import requests
+from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
 import torch
 import tkinter as tk
 from tkinter import filedialog
@@ -7,30 +10,13 @@ from PIL import Image, ImageTk
 #//-------------------------------------------------------------------------------------------------------------------------
 #//definíciók, funkciók:
 
-pipe = QwenImagePipeline.from_pretrained(
-    torch_dtype=torch.bfloat16,
-    device="cuda",
-    model_configs=[
-        ModelConfig(
-            model_id="Qwen/Qwen-Image-Edit",
-            origin_file_pattern="transformer/diffusion_pytorch_model*.safetensors"
-        ),
-        ModelConfig(
-            model_id="Qwen/Qwen-Image",
-            origin_file_pattern="text_encoder/model*.safetensors"
-        ),
-        ModelConfig(
-            model_id="Qwen/Qwen-Image",
-            origin_file_pattern="vae/diffusion_pytorch_model.safetensors"
-        ),
-    ],
-    processor_config=ModelConfig(
-        model_id="Qwen/Qwen-Image-Edit",
-        origin_file_pattern="processor/"
-    ),
-)
+model_id = "timbrooks/instruct-pix2pix"
+pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16, safety_checker=None)
+pipe.to("cpu")
+pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
 
-pipe.load_lora(pipe.dit, "eigen-ai-labs/eigen-banana-qwen-image-edit/eigen-banana-qwen-image-edit-fp16-lora.safetensors")
+url = "https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg"
+
 
 def belep(event):
     if prompt_text.get('1.0', "end-1c") == placeholder:
@@ -43,34 +29,44 @@ szerk_kep = None
 imgcount = 0
 
 def kepfeltoltes():
+    global felt_kep, felt_pil
     file_utvonala = filedialog.askopenfilename(
         filetypes=[("Image files", "*.png *.jpg *.jpeg")]
     )
     if file_utvonala:
-        kep = Image.open(file_utvonala)
-        kep = kep.resize((400, 300))
-        felt_kep = ImageTk.PhotoImage(kep)
+        felt_pil = Image.open(file_utvonala).convert("RGB")
+        kp = felt_pil.resize((400, 300))
+
+        felt_kep = ImageTk.PhotoImage(kp)
         felt_canvas.create_image(0, 0, anchor="nw", image=felt_kep)
-        felt_canvas.image = felt_kep
 
 def kepszerkesztes():
-    szerk_prompt += prompt_text.get()
-    szerk_kep = pipe(
-    szerk_prompt,
-    szerk_kep=felt_kep,
-    seed=1,
-    num_inference_steps=40,
-    height=400,
-    width=300,
-    edit_image_auto_resize=True
-    )
-    szerk_canvas.create_image(0, 0, anchor="nw", image=szerk_kep)
-    szerk_canvas.image = szerk_kep
+    global szerk_kep, szerk_pil, szerk_prompt
 
-def kepletoltes():
-    if szerk_canvas.image:
-        szerk_kep.save("szerkesztett_kep"+imgcount+".png")
-        imgcount += 1
+    text = prompt_text.get("1.0", "end-1c")
+    final_prompt = szerk_prompt + " " + text
+
+    result = pipe(
+        prompt=final_prompt,
+        image=felt_pil,
+        num_inference_steps=20,
+        image_guidance_scale=1.2
+    )
+
+    szerk_pil = result.images[0] 
+    kp = szerk_pil.resize((400, 300))
+
+    szerk_kep = ImageTk.PhotoImage(kp)
+    szerk_canvas.create_image(0, 0, anchor="nw", image=szerk_kep)
+
+def kepletoltes(url):
+    global imgcount, szerk_pil
+    szerk_pil = PIL.Image.open(requests.get(url, stream=True).raw)
+    szerk_pil = PIL.ImageOps.exif_transpose(szerk_pil)
+    szerk_pil = szerk_pil.convert("RGB")
+    filename = f"szerkesztett_{imgcount}.png"
+    szerk_pil.save(filename)
+    imgcount += 1
 
 def funkciovalasztas(c):
     if c == 1:
