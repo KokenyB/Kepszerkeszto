@@ -11,8 +11,12 @@ from PIL import Image, ImageTk
 #//definíciók, funkciók:
 
 model_id = "timbrooks/instruct-pix2pix"
-pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16, safety_checker=None)
-pipe.to("cuda")
+pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
+    model_id,
+    torch_dtype=torch.float16,
+    safety_checker=None
+)
+pipe.to("cpu")
 pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
 
 url = "https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg"
@@ -23,9 +27,10 @@ def belep(event):
         prompt_text.delete('1.0', "end-1c")
         prompt_text.config(fg="black")
 
-szerk_prompt = ""
 felt_kep = None
+szerk_pil = None
 szerk_kep = None
+szerk_prompt = ""
 imgcount = 0
 
 def kepfeltoltes():
@@ -42,31 +47,28 @@ def kepfeltoltes():
 
 def kepszerkesztes():
     global szerk_kep, szerk_pil, szerk_prompt
-
     text = prompt_text.get("1.0", "end-1c")
-    final_prompt = szerk_prompt + " " + text
-
+    final_prompt = (szerk_prompt + " " + text).strip()
+    if not final_prompt:
+        final_prompt = "Make minor edits"
     result = pipe(
         prompt=final_prompt,
         image=felt_pil,
-        num_inference_steps=20,
-        image_guidance_scale=1.2
+        num_inference_steps=10,  
+        image_guidance_scale=1.0
     )
-
-    szerk_pil = result.images[0] 
+    szerk_pil = result.images[0]
     kp = szerk_pil.resize((400, 300))
-
     szerk_kep = ImageTk.PhotoImage(kp)
     szerk_canvas.create_image(0, 0, anchor="nw", image=szerk_kep)
-
+    
 def kepletoltes(url):
     global imgcount, szerk_pil
-    szerk_pil = PIL.Image.open(requests.get(url, stream=True).raw)
-    szerk_pil = PIL.ImageOps.exif_transpose(szerk_pil)
-    szerk_pil = szerk_pil.convert("RGB")
-    filename = f"szerkesztett_{imgcount}.png"
-    szerk_pil.save(filename)
-    imgcount += 1
+    if szerk_pil:
+        filename = f"szerkesztett_{imgcount}.png"
+        szerk_pil.save(filename)
+        imgcount += 1
+        print(f"Kép elmentve: {filename}")
 
 def funkciovalasztas(c):
     if c == 1:
