@@ -1,7 +1,8 @@
 from PIL import Image
 import PIL
 import requests
-from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
+from diffusers import QwenImageEditPipeline
+import os
 import torch
 import tkinter as tk
 from tkinter import filedialog
@@ -10,17 +11,11 @@ from PIL import Image, ImageTk
 #//-------------------------------------------------------------------------------------------------------------------------
 #//definíciók, funkciók:
 
-model_id = "timbrooks/instruct-pix2pix"
-pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-    model_id,
-    torch_dtype=torch.float16,
-    safety_checker=None
-    low_cpu_mem_usage=True
-)
-pipe.to("cudo")
-pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
-
-url = "https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg"
+pipeline = QwenImageEditPipeline.from_pretrained("Qwen/Qwen-Image-Edit")
+print("pipeline loaded")
+pipeline.to(torch.bfloat16)
+pipeline.to("cuda")
+pipeline.set_progress_bar_config(disable=None)
 
 
 def belep(event):
@@ -49,21 +44,33 @@ def kepfeltoltes():
 def kepszerkesztes():
     global szerk_kep, szerk_pil, szerk_prompt
     text = prompt_text.get("1.0", "end-1c")
-    final_prompt = (szerk_prompt + " " + text).strip()
-    if not final_prompt:
-        final_prompt = "Make minor edits"
-    result = pipe(
-        prompt=final_prompt,
-        image=felt_pil,
-        num_inference_steps=10,  
-        image_guidance_scale=1.0
-    )
-    szerk_pil = result.images[0]
-    kp = szerk_pil.resize((400, 300))
-    szerk_kep = ImageTk.PhotoImage(kp)
-    szerk_canvas.create_image(0, 0, anchor="nw", image=szerk_kep)
+    final_prompt = (szerk_prompt + " " + text)
+    inputs = {
+    "image": felt_pil,
+    "prompt": final_prompt,
+    "generator": torch.manual_seed(0),
+    "true_cfg_scale": 4.0,
+    "negative_prompt": " ",
+    "num_inference_steps": 50,
+}
+    with torch.inference_mode():
+        output = pipeline(**inputs)
+        szerk_pil = output.images[0]
+        kp = szerk_pil.resize((400, 300))
+        szerk_kep = ImageTk.PhotoImage(kp)
+        szerk_canvas.create_image(0, 0, anchor="nw", image=szerk_kep)
+    funk1_canvas.config(bg="#FF0000")
+    funk2_canvas.config(bg="#FF0000")
+    funk3_canvas.config(bg="#FF0000")
+    funk4_canvas.config(bg="#FF0000")
+    funk5_canvas.config(bg="#FF0000")
+    funk6_canvas.config(bg="#FF0000")
+    final_prompt = ""
+    prompt_text.delete('1.0', "end-1c")
+    prompt_text.insert('1.0', placeholder)
+    prompt_text.config(fg="gray")
     
-def kepletoltes(url):
+def kepletoltes():
     global imgcount, szerk_pil
     if szerk_pil:
         filename = f"szerkesztett_{imgcount}.png"
