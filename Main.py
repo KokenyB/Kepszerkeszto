@@ -15,8 +15,9 @@ pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
     model_id,
     torch_dtype=torch.float16,
     safety_checker=None
+    low_cpu_mem_usage=True
 )
-pipe.to("cpu")
+pipe.to("cudo")
 pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
 
 url = "https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg"
@@ -71,6 +72,7 @@ def kepletoltes(url):
         print(f"Kép elmentve: {filename}")
 
 def funkciovalasztas(c):
+    global szerk_prompt
     if c == 1:
         funk1_canvas.config(bg="#00FF00")
         funk2_canvas.config(bg="#FF0000")
